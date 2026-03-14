@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神秘塔罗 · 占卜之旅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #e0d4fc;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #b8a8d8;
+            font-style: italic;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6b4c9a 0%, #4a2c7a 100%);
+            color: white;
+            border: 2px solid #9370db;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #7b5caa 0%, #5a3c8a 100%);
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #333;
+            border-color: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spread-selector {
+            margin: 20px 0;
+        }
+
+        .spread-selector select {
+            background: rgba(107, 76, 154, 0.3);
+            color: #e0d4fc;
+            border: 2px solid #9370db;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+        }
+
+        .spread-area {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            min-height: 400px;
+        }
+
+        .card-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-label {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #b8a8d8;
+            text-align: center;
+            min-height: 40px;
+        }
+
+        .card {
+            width: 200px;
+            height: 320px;
+            perspective: 1000px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card.reversed .card-inner {
+            transform: rotateY(180deg) rotateZ(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%);
+            border: 3px solid #9370db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back-pattern {
+            width: 80%;
+            height: 80%;
+            border: 2px solid #6b4c9a;
+            border-radius: 10px;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(147, 112, 219, 0.1) 10px,
+                rgba(147, 112, 219, 0.1) 20px
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back-symbol {
+            font-size: 3em;
+            color: #9370db;
+            text-shadow: 0 0 10px rgba(147, 112, 219, 0.5);
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            background: #1a0a2e;
+            border: 3px solid #c9a227;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 85%;
+            object-fit: cover;
+        }
+
+        .card-name {
+            height: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a0a2e 100%);
+            font-size: 0.9em;
+            color: #e0d4fc;
+            text-align: center;
+            padding: 5px;
+            border-top: 2px solid #c9a227;
+        }
+
+        .meaning-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .meaning-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%);
+            border: 3px solid #9370db;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            color: #9370db;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #e0d4fc;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #c9a227;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #9370db;
+            padding-bottom: 15px;
+        }
+
+        .modal-position {
+            font-size: 1.2em;
+            color: #b8a8d8;
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            color: #9370db;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .modal-section p {
+            line-height: 1.6;
+            color: #e0d4fc;
+        }
+
+        .reversed-badge {
+            background: linear-gradient(135deg, #4a1c1c 0%, #2d0f0f 100%);
+            color: #ff6b6b;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .shuffle-animation {
+            animation: shuffle 0.5s ease-in-out;
+        }
+
+        @keyframes shuffle {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-20px) rotate(-5deg); }
+            75% { transform: translateX(20px) rotate(5deg); }
+        }
+
+        .instructions {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(107, 76, 154, 0.2);
+            border-radius: 10px;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: 140px;
+                height: 224px;
+            }
+
+            .spread-area {
+                gap: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <header>
+            <h1>神秘塔罗</h1>
+            <p class="subtitle">聆听内心的声音 · 探索命运的指引</p>
+        </header>
+
+        <div class="controls">
+            <div class="spread-selector">
+                <select id="spreadType">
+                    <option value="one">单牌指引</option>
+                    <option value="three" selected>时间三牌阵（过去-现在-未来）</option>
+                </select>
+            </div>
+            <button class="btn" id="shuffleBtn" onclick="shuffleDeck()">洗牌</button>
+            <button class="btn" id="drawBtn" onclick="drawCards()" disabled>抽牌</button>
+            <button class="btn" id="resetBtn" onclick="resetGame()">重新开始</button>
+        </div>
+
+        <div class="instructions" id="instructions">
+            点击"洗牌"开始，然后点击"抽牌"获取你的塔罗指引
+        </div>
+
+        <div class="spread-area" id="spreadArea"></div>
+    </div>
+
+    <div class="meaning-modal" id="meaningModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <p class="modal-position" id="modalPosition"></p>
+            <div class="modal-section">
+                <h3>关键词</h3>
+                <p id="modalKeywords"></p>
+            </div>
+            <div class="modal-section">
+                <h3>牌面解读</h3>
+                <p id="modalMeaning"></p>
+            </div>
+            <div class="modal-section">
+                <h3>人生启示</h3>
+                <p id="modalAdvice"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // 塔罗牌数据
+        const tarotDeck = [
+            // 大阿卡纳
+            { id: 0, name: "愚者", image: "愚者日出.jpg",
+              upright: { keywords: "新的开始、冒险、自由、纯真", meaning: "愚者代表着无限的潜力和新的开始。你站在悬崖边缘，准备踏上未知的旅程。这张牌鼓励你保持开放的心态，勇敢地面对生活中的新机会和挑战。", advice: "现在是冒险的好时机，相信你的直觉，不要害怕失败。每一次新的开始都是成长的机会。" },
+              reversed: { keywords: "鲁莽、冒险、愚蠢、缺乏计划", meaning: "愚者逆位暗示你可能在某些方面过于冲动，没有充分考虑后果。提醒你在做出重大决定前要三思而行。", advice: "放慢脚步，仔细评估你的计划。冒险需要勇气，但更需要智慧。" }
+            },
+            { id: 1, name: "魔术师", image: "魔术师牌.jpg",
+              upright: { keywords: "创造力、技能、意志力、自信", meaning: "魔术师拥有实现目标所需的一切资源和能力。这张牌代表着你现在拥有将想法转化为现实的能力和机会。", advice: "相信自己的能力，利用你手边的资源。你拥有创造奇迹的力量。" },
+              reversed: { keywords: "欺骗、操控、缺乏技能、混乱", meaning: "魔术师逆位可能意味着欺骗或操纵，或者是你感到自己缺乏实现目标的能力。", advice: "保持诚实，审视自己的技能水平。如果你感到不足，现在正是学习和成长的好时机。" }
+            },
+            { id: 2, name: "女祭司", image: "女祭司塔罗.jpg",
+              upright: { keywords: "直觉、潜意识、神秘、智慧", meaning: "女祭司代表着深层的智慧和直觉。她提醒你倾听内心的声音，相信你的第六感。", advice: "花些时间独处和冥想。答案往往隐藏在内心深处，需要静下心来聆听。" },
+              reversed: { keywords: "压抑情绪、缺乏直觉、肤浅", meaning: "女祭司逆位可能意味着你忽略了内心的声音，或者被外界的声音所干扰。", advice: "重新与自己的内在建立联系。不要让他人的观点淹没了你的直觉。" }
+            },
+            { id: 3, name: "女皇", image: "女皇塔罗.jpg",
+              upright: { keywords: "丰饶、母性、创造力、自然", meaning: "女皇代表着丰盛和创造力。她鼓励你拥抱生活中的美好事物，享受创作的乐趣。", advice: "让自己的创造力自由流淌。现在是创造、表达和享受生活的好时机。" },
+              reversed: { keywords: "依赖、过度保护、缺乏创造力", meaning: "女皇逆位可能意味着过度依赖他人，或者创造力受阻。", advice: "培养独立性和自主性。不要害怕表达你的真实想法和创意。" }
+            },
+            { id: 4, name: "皇帝", image: "皇帝塔罗牌.jpg",
+              upright: { keywords: "权威、结构、控制、父亲形象", meaning: "皇帝代表着秩序、权威和结构。他提醒你建立清晰的目标和计划，用理性的方式管理你的生活。", advice: "制定明确的规则和界限。保持纪律和专注，这将帮助你达成目标。" },
+              reversed: { keywords: "暴政、僵化、缺乏控制", meaning: "皇帝逆位可能意味着过度控制或失去控制，需要找到平衡。", advice: "学会放手，信任他人。过度的控制可能会适得其反。" }
+            },
+            { id: 5, name: "教皇", image: "教皇塔罗牌.jpg",
+              upright: { keywords: "传统、信仰、教导、精神指引", meaning: "教皇代表着传统、信仰和智慧传承。他提醒你尊重过去的智慧，但也要学会独立思考。", advice: "寻求导师的指导，但不要盲目追随。将传统智慧与个人理解相结合。" },
+              reversed: { keywords: "反叛、打破传统、虚假信仰", meaning: "教皇逆位可能意味着你正在质疑传统权威，或者需要打破固有的思维模式。", advice: "勇敢地质疑现状，找到真正属于自己的信仰和道路。" }
+            },
+            { id: 6, name: "恋人", image: "恋人塔罗.jpg",
+              upright: { keywords: "爱、和谐、选择、关系", meaning: "恋人牌代表着爱的力量和重要的选择。它提醒你关注人际关系，做出符合内心真实意愿的决定。", advice: "倾听你的内心，做出符合你真实价值观的选择。爱能够指引你走向正确的道路。" },
+              reversed: { keywords: "不和谐、分离、错误的选择", meaning: "恋人逆位可能意味着关系中的不和谐，或者做出了错误的选择。", advice: "审视你的关系和决定。如果不合适，不要害怕做出改变。" }
+            },
+            { id: 7, name: "战车", image: "战车塔罗.jpg",
+              upright: { keywords: "胜利、意志力、决心、控制", meaning: "战车代表着通过意志力和决心取得胜利。它鼓励你保持专注，克服障碍。", advice: "相信自己的能力，坚持下去。成功属于那些有决心的人。" },
+              reversed: { keywords: "失控、缺乏方向、失败", meaning: "战车逆位可能意味着你失去了控制，或者缺乏明确的方向。", advice: "重新评估你的目标，找回控制权。不要让外在因素左右你的决定。" }
+            },
+            { id: 8, name: "力量", image: "力量牌.jpg",
+              upright: { keywords: "勇气、耐心、控制、同情心", meaning: "力量牌代表着内在的力量和勇气。它提醒你真正的力量来自于耐心和自我控制。", advice: "用柔韧和耐心面对挑战。内在的力量比外在的蛮力更强大。" },
+              reversed: { keywords: "软弱、不安全感、自我怀疑", meaning: "力量逆位可能意味着你感到软弱或缺乏自信。", advice: "相信自己的内在力量。每个人都有克服困难的能力。" }
+            },
+            { id: 9, name: "隐士", image: "隐士星灯.jpg",
+              upright: { keywords: "内省、寻求真理、孤独、智慧", meaning: "隐士代表着向内寻求答案。他提醒你花时间独处，寻找内心的真理。", advice: "给自己一些独处的时间。真正的答案往往来自内心的反思。" },
+              reversed: { keywords: "孤立、孤独、固执己见", meaning: "隐士逆位可能意味着过度的孤立，或者拒绝他人的帮助和观点。", advice: "平衡独处与社交。不要让孤独变成孤立。" }
+            },
+            { id: 10, name: "命运之轮", image: "命运之轮.jpg",
+              upright: { keywords: "命运、转折点、循环、好运", meaning: "命运之轮代表着生活的变化和转折点。它提醒你接受变化，相信命运的安排。", advice: "拥抱变化，保持开放的心态。每一次转折都带来新的机会。" },
+              reversed: { keywords: "厄运、抗拒变化、失控", meaning: "命运之轮逆位可能意味着你正在经历困难时期，或者抗拒不可避免的变化。", advice: "学会接受和适应。即使在困难时期，也要相信这只是生活循环的一部分。" }
+            },
+            { id: 11, name: "正义", image: "正义塔罗.jpg",
+              upright: { keywords: "公平、真理、因果、法律", meaning: "正义牌代表着公平和真理。它提醒你要对自己的行为负责，并寻求公正的解决方案。", advice: "做出决定时保持客观和公正。相信正义终将得到伸张。" },
+              reversed: { keywords: "不公正、逃避责任、偏见", meaning: "正义逆位可能意味着不公正，或者你在逃避责任。", advice: "承担起你的责任。不要让偏见影响你的判断。" }
+            },
+            { id: 12, name: "倒吊人", image: "倒吊人塔罗.jpg",
+              upright: { keywords: "牺牲、等待、新视角、放下", meaning: "倒吊人代表着通过牺牲和等待获得新的视角。他提醒你有时需要暂时放下控制。", advice: "改变你的视角。有时放手和等待比行动更有效。" },
+              reversed: { keywords: "拖延、无谓的牺牲、停滞不前", meaning: "倒吊人逆位可能意味着你在拖延，或者在做出无谓的牺牲。", advice: "评估你的牺牲是否值得。不要让等待变成停滞。" }
+            },
+            { id: 13, name: "死神", image: "死神塔罗牌.jpg",
+              upright: { keywords: "结束、转变、重生、放下", meaning: "死神牌代表着结束和新的开始。它提醒你只有放下旧的，才能迎接新的。", advice: "接受结束，相信新生。每一次结束都是新的开始的机会。" },
+              reversed: { keywords: "抗拒改变、停滞、无法放下", meaning: "死神逆位可能意味着你抗拒必要的改变，或者无法放下过去。", advice: "学会放手。改变虽然痛苦，但往往是成长的必要步骤。" }
+            },
+            { id: 14, name: "节制", image: "节制牌.jpg",
+              upright: { keywords: "平衡、适度、耐心、融合", meaning: "节制牌代表着平衡和适度。它提醒你在生活的各个方面保持和谐。", advice: "寻求平衡。过度或不足都会带来问题，找到中间的道路。" },
+              reversed: { keywords: "失衡、过度、缺乏耐心", meaning: "节制逆位可能意味着生活失去了平衡，或者你缺乏耐心。", advice: "重新调整你的生活节奏。平衡是可持续成功的关键。" }
+            },
+            { id: 15, name: "恶魔", image: "恶魔牌.jpg",
+              upright: { keywords: "束缚、物质主义、欲望、成瘾", meaning: "恶魔牌代表着束缚和物质欲望。它提醒你审视那些限制你的信念和行为模式。", advice: "认识到你的束缚。真正的自由来自于打破内在的枷锁。" },
+              reversed: { keywords: "解脱、觉醒、打破束缚", meaning: "恶魔逆位是一个积极的信号，意味着你正在觉醒并打破束缚。", advice: "继续走向自由。每一次觉醒都让你更接近真正的自己。" }
+            },
+            { id: 16, name: "塔", image: "塔牌雷击坠.jpg",
+              upright: { keywords: "突变、灾难、启示、崩溃", meaning: "塔牌代表着突然的变化和启示。它提醒你有些结构必须崩塌，真相才能显现。", advice: "接受改变。虽然痛苦，但崩溃往往带来重建和更好的未来。" },
+              reversed: { keywords: "避免灾难、延迟的改变、恐惧", meaning: "塔逆位可能意味着你在逃避必要的改变，或者对改变感到恐惧。", advice: "不要害怕改变。与其等待灾难，不如主动进行必要的调整。" }
+            },
+            { id: 17, name: "星星", image: "星牌设计.jpg",
+              upright: { keywords: "希望、灵感、宁静、疗愈", meaning: "星星牌代表着希望和灵感。它提醒你即使在黑暗中，也总有星光指引。", advice: "保持希望。困难和挑战终将过去，光明的未来在等待着你。" },
+              reversed: { keywords: "缺乏信心、绝望、失望", meaning: "星星逆位可能意味着你失去了希望，或者感到失望。", advice: "重新连接你的内在光源。希望从来不会真正消失，只是暂时被遮蔽。" }
+            },
+            { id: 18, name: "月亮", image: "月牌.jpg",
+              upright: { keywords: "幻觉、恐惧、焦虑、潜意识", meaning: "月亮牌代表着幻象和恐惧。它提醒你有些事情并非表象那样，需要深入探索。", advice: "面对你的恐惧。只有认清真相，你才能获得真正的自由。" },
+              reversed: { keywords: "释放恐惧、克服幻觉、清晰", meaning: "月亮逆位是一个积极的信号，意味着你正在克服恐惧和幻觉。", advice: "继续走向清晰。真相终将大白，恐惧将消散。" }
+            },
+            { id: 19, name: "太阳", image: "太阳牌.jpg",
+              upright: { keywords: "快乐、成功、活力、积极", meaning: "太阳牌代表着纯粹的快乐和成功。它提醒你享受当下的美好时刻。", advice: "享受生活。现在是庆祝和感恩的好时机。你值得拥有这份快乐。" },
+              reversed: { keywords: "暂时的挫折、不切实际的期望", meaning: "太阳逆位可能意味着暂时的挫折，或者你的期望过高。", advice: "保持积极，但也要现实。小小的挫折不应影响你对生活的热爱。" }
+            },
+            { id: 20, name: "审判", image: "审判牌.jpg",
+              upright: { keywords: "复活、觉醒、召唤、决断", meaning: "审判牌代表着觉醒和重生。它提醒你现在是做出重要决定的时候了。", advice: "面对你的过去，做出明智的决定。现在是成长和转变的关键时刻。" },
+              reversed: { keywords: "自我怀疑、拒绝召唤、延迟", meaning: "审判逆位可能意味着你自我怀疑，或者拒绝面对召唤。", advice: "相信你的判断力。不要让恐惧阻止你做出必要的改变。" }
+            },
+            { id: 21, name: "世界", image: "塔罗世界牌.jpg",
+              upright: { keywords: "完成、成就、整合、圆满", meaning: "世界牌代表着完成和成就。它标志着一个周期的圆满结束。", advice: "庆祝你的成就。这是一个新的开始，你已经为下一阶段做好了准备。" },
+              reversed: { keywords: "未完成、缺乏整合、停滞", meaning: "世界逆位可能意味着还有工作要做，或者你未能整合所学。", advice: "继续努力。你离目标很近了，不要在最后关头放弃。" }
+            },
+
+            // 权杖小阿卡纳
+            { id: 22, name: "权杖首牌", image: "火杖首牌.jpg",
+              upright: { keywords: "新的开始、灵感、行动力", meaning: "权杖首牌代表着充满活力和灵感的开始。现在是采取行动的好时机。", advice: "抓住机会，立即行动。你的想法值得付诸实践。" },
+              reversed: { keywords: "延迟、缺乏行动、错失机会", meaning: "逆位可能意味着拖延或错失良机。", advice: "不要等待完美的时机，现在就是最好的时机。" }
+            },
+            { id: 23, name: "权杖二", image: "火杖二.jpg",
+              upright: { keywords: "规划、决策、未知领域", meaning: "权杖二代表着你正在规划未来，准备踏入新的领域。", advice: "做好充分的准备，但不要过度分析。行动是成功的关键。" },
+              reversed: { keywords: "恐惧未知、缺乏计划", meaning: "逆位暗示你对未知感到恐惧或计划不周。", advice: "面对你的恐惧，制定更详细的计划。" }
+            },
+            { id: 24, name: "权杖三", image: "三权杖.jpg",
+              upright: { keywords: "远见、扩张、机会", meaning: "权杖三代表着看到更广阔的视野，准备迎接新的机会。", advice: "放眼长远，不要局限于眼前的利益。更大的机会在等待着你。" },
+              reversed: { keywords: "缺乏远见、延迟", meaning: "逆位可能意味着你缺乏远见或在推迟行动。", advice: "重新评估你的长期目标，确保它们与你的价值观一致。" }
+            },
+            { id: 25, name: "权杖四", image: "火杖四.jpg",
+              upright: { keywords: "稳定、庆祝、和谐", meaning: "权杖四代表着稳定和庆祝。你正在享受努力的成果。", advice: "享受你的成就，但不要停止前进。稳定是进一步发展的基础。" },
+              reversed: { keywords: "不稳定、缺乏庆祝", meaning: "逆位可能意味着你的基础不稳或未能享受成果。", advice: "巩固你的基础，学会庆祝小胜利。" }
+            },
+            { id: 26, name: "权杖五", image: "火杖五争.jpg",
+              upright: { keywords: "冲突、竞争、挑战", meaning: "权杖五代表着冲突和竞争。你需要面对挑战，证明自己的能力。", advice: "勇敢面对竞争，但不要陷入无谓的冲突。专注于你的目标。" },
+              reversed: { keywords: "逃避冲突、内部斗争", meaning: "逆位可能意味着你在逃避冲突或与自己斗争。", advice: "面对你的内心，找到真正的竞争对手——你自己。" }
+            },
+            { id: 27, name: "权杖六", image: "火杖六.jpg",
+              upright: { keywords: "胜利、成功、公众认可", meaning: "权杖六代表着胜利和公众认可。你正在获得应有的荣誉。", advice: "接受你的胜利，感谢支持你的人。成功从来不是一个人的功劳。" },
+              reversed: { keywords: "缺乏自信、虚假的胜利", meaning: "逆位可能意味着你对自己的成功感到不自信。", advice: "相信你的能力，你值得这份成功。" }
+            },
+            { id: 28, name: "权杖七", image: "火杖七.jpg",
+              upright: { keywords: "挑战、立场、勇气", meaning: "权杖七代表着坚守立场，勇敢面对挑战。", advice: "坚持你的立场，用勇气和智慧应对挑战。" },
+              reversed: { keywords: "放弃、防御、不知所措", meaning: "逆位可能意味着你在放弃立场或感到不知所措。", advice: "重新评估你的立场。如果值得坚持，就不要放弃。" }
+            },
+            { id: 29, name: "权杖八", image: "火杖八.jpg",
+              upright: { keywords: "速度、行动、进展", meaning: "权杖八代表着快速行动和进展。事情正在快速发展。", advice: "把握时机，快速行动。不要让机会从指缝中溜走。" },
+              reversed: { keywords: "延误、匆忙、挫折", meaning: "逆位可能意味着你的进展受阻或过于匆忙。", advice: "平衡速度和质量。不要急于求成，但也不可拖延。" }
+            },
+            { id: 30, name: "权杖九", image: "九权杖.jpg",
+              upright: { keywords: "坚持、韧性、防御", meaning: "权杖九代表着坚持和韧性。即使面对困难，你也要继续前进。", advice: "保持韧性，你已经走了很远。不要在最后关头放弃。" },
+              reversed: { keywords: "精疲力竭、缺乏信心", meaning: "逆位可能意味着你感到疲惫或失去信心。", advice: "休息一下，恢复精力。但不要忘记你的目标。" }
+            },
+            { id: 31, name: "权杖十", image: "火杖十.jpg",
+              upright: { keywords: "负担、压力、责任", meaning: "权杖十代表着过重的负担。你可能承担了太多责任。", advice: "学会放权，不要独自承担所有责任。寻求帮助不是弱点。" },
+              reversed: { keywords: "释放负担、寻求帮助", meaning: "逆位是一个积极的信号，意味着你正在释放负担。", advice: "继续释放不必要的负担。轻松的步伐才能走得更远。" }
+            },
+            { id: 32, name: "权杖侍者", image: "火杖侍童.jpg",
+              upright: { keywords: "激情、创造力、新机会", meaning: "权杖侍者代表着激情和创造力。新的机会正在敲门。", advice: "保持热情，抓住新机会。你的创造力将带你走向成功。" },
+              reversed: { keywords: "缺乏热情、挫折", meaning: "逆位可能意味着你失去了热情或遇到挫折。", advice: "重新点燃你的激情。热情是成功的燃料。" }
+            },
+            { id: 33, name: "权杖骑士", image: "火杖骑士.jpg",
+              upright: { keywords: "行动、冒险、热情", meaning: "权杖骑士代表着行动和冒险。他鼓励你勇敢追求目标。", advice: "采取行动，不要等待。冒险是成长的必要部分。" },
+              reversed: { keywords: "鲁莽、冲动、挫折", meaning: "逆位可能意味着你过于鲁莽或遇到挫折。", advice: "平衡行动与思考。勇敢不是鲁莽。" }
+            },
+            { id: 34, name: "权杖皇后", image: "火后权杖.jpg",
+              upright: { keywords: "自信、独立、创造力", meaning: "权杖皇后代表着自信和独立的创造力。她鼓励你相信自己的能力。", advice: "相信你自己，你拥有创造美好生活的能力。" },
+              reversed: { keywords: "缺乏自信、自我怀疑", meaning: "逆位可能意味着你对自己缺乏信心。", advice: "重新发现你的力量。你比想象中更强大。" }
+            },
+            { id: 35, name: "权杖国王", image: "权杖国王.jpg",
+              upright: { keywords: "领导力、雄心、控制", meaning: "权杖国王代表着强大的领导力和雄心。他能够实现自己的目标。", advice: "发挥你的领导才能，但也要关心他人。真正的领导者能够激励团队。" },
+              reversed: { keywords: "暴政、失控、傲慢", meaning: "逆位可能意味着你过于专横或失去控制。", advice: "学会谦逊，倾听他人的意见。" }
+            },
+
+            // 圣杯小阿卡纳
+            { id: 36, name: "圣杯首牌", image: "圣杯首牌.jpg",
+              upright: { keywords: "新的情感、爱情、直觉", meaning: "圣杯首牌代表着新的情感开始，可能是爱情、友情或灵性觉醒。", advice: "开放你的心扉，迎接新的情感体验。" },
+              reversed: { keywords: "情感阻塞、不快乐", meaning: "逆位可能意味着你的情感受到阻碍或感到不快乐。", advice: "探索你内心的感受，不要压抑情绪。" }
+            },
+            { id: 37, name: "圣杯二", image: "圣杯二.jpg",
+              upright: { keywords: "合作、伙伴关系、和谐", meaning: "圣杯二代表着和谐的合作关系。你与他人有着良好的连接。", advice: "珍惜你的人际关系，合作能够创造更大的价值。" },
+              reversed: { keywords: "不和谐、缺乏平衡", meaning: "逆位可能意味着关系中的不和谐或失衡。", advice: "修复受损的关系，恢复平衡。" }
+            },
+            { id: 38, name: "圣杯三", image: "三圣杯.jpg",
+              upright: { keywords: "庆祝、友谊、社群", meaning: "圣杯三代表着庆祝和友谊。与他人分享快乐让生活更美好。", advice: "与朋友一起庆祝生活中的美好时刻。" },
+              reversed: { keywords: "过度社交、孤立", meaning: "逆位可能意味着你在过度社交或反而感到孤立。", advice: "找到社交的平衡点。质量比数量更重要。" }
+            },
+            { id: 39, name: "圣杯四", image: "四杯牌.jpg",
+              upright: { keywords: "沉思、冷漠、机会", meaning: "圣杯四代表着沉思和冷漠。你可能正在错过身边的机会。", advice: "睁开你的眼睛，机会就在眼前。不要因为过去的失望而错过现在。" },
+              reversed: { keywords: "觉醒、新的视角", meaning: "逆位是一个积极的信号，意味着你正在觉醒并看到新的可能性。", advice: "继续探索，新的视角将带来新的机会。" }
+            },
+            { id: 40, name: "圣杯五", image: "圣杯五.jpg",
+              upright: { keywords: "失落、悲伤、遗憾", meaning: "圣杯五代表着失落和悲伤。你可能过于关注失去的东西。", advice: "不要沉溺于过去。关注你仍然拥有的，向前看。" },
+              reversed: { keywords: "走出悲伤、接受", meaning: "逆位是一个积极的信号，意味着你正在接受失落并向前迈进。", advice: "继续疗愈，你正在正确的道路上。" }
+            },
+            { id: 41, name: "圣杯六", image: "圣杯六.jpg",
+              upright: { keywords: "怀旧、童年回忆、善意", meaning: "圣杯六代表着怀旧和来自过去的善意。美好的回忆带来安慰。", advice: "珍惜美好的回忆，但不要让它们阻止你前进。", advice: "回忆是美好的，但未来更值得期待。" },
+              reversed: { keywords: "活在过去、拒绝成长", meaning: "逆位可能意味着你过于沉溺过去，拒绝成长。", advice: "接受成长是生活的一部分。回忆不应成为枷锁。" }
+            },
+            { id: 42, name: "圣杯七", image: "圣杯七.jpg",
+              upright: { keywords: "选择、幻想、诱惑", meaning: "圣杯七代表着多种选择和幻想。你可能被各种可能性所迷惑。", advice: "理清你的优先级，做出真正符合你内心的选择。" },
+              reversed: { keywords: "做出选择、清晰", meaning: "逆位是一个积极的信号，意味着你正在做出明智的选择。", advice: "相信你的直觉，选择能够带来真正满足的道路。" }
+            },
+            { id: 43, name: "圣杯八", image: "离杯向山.jpg",
+              upright: { keywords: "离开、放弃、继续前进", meaning: "圣杯八代表着离开熟悉的环境，继续前进。这需要勇气。", advice: "勇敢地离开不再适合你的环境。新的旅程在等待着你。" },
+              reversed: { keywords: "恐惧改变、拖延", meaning: "逆位可能意味着你害怕改变，在拖延离开。", advice: "面对你的恐惧，离开是成长的第一步。" }
+            },
+            { id: 44, name: "圣杯九", image: "圣杯九.jpg",
+              upright: { keywords: "满足、愿望成真、享受", meaning: "圣杯九代表着满足和愿望成真。享受你的成就。", advice: "感恩你现在所拥有的一切。满足感是幸福的源泉。" },
+              reversed: { keywords: "不满足、傲慢", meaning: "逆位可能意味着你仍然感到不满足或变得傲慢。", advice: "学会知足，感恩让你更快乐。" }
+            },
+            { id: 45, name: "圣杯十", image: "圣杯十家庭.jpg",
+              upright: { keywords: "家庭、和谐、情感满足", meaning: "圣杯十代表着家庭的和谐与情感的深度满足。", advice: "珍惜与家人的关系，它们是你最宝贵的财富。" },
+              reversed: { keywords: "家庭不和、情感断联", meaning: "逆位可能意味着家庭关系紧张或情感断联。", advice: "修复受损的家庭关系，沟通是关键。" }
+            },
+            { id: 46, name: "圣杯侍者", image: "杯侍者.jpg",
+              upright: { keywords: "情感讯息、直觉、温柔", meaning: "圣杯侍者代表着温柔的情感讯息和直觉。", advice: "倾听你的情感和直觉，它们有重要的信息要告诉你。" },
+              reversed: { keywords: "情感不成熟、失望", meaning: "逆位可能意味着你在情感上不够成熟或感到失望。", advice: "继续成长，情感成熟需要时间和经验。" }
+            },
+            { id: 47, name: "圣杯骑士", image: "圣杯骑士.jpg",
+              upright: { keywords: "浪漫、魅力、想象力", meaning: "圣杯骑士代表着浪漫和魅力。他能够创造美好的情感体验。", advice: "让你的浪漫和创造力自由表达。" },
+              reversed: { keywords: "情绪化、失望", meaning: "逆位可能意味着你过于情绪化或遇到失望。", advice: "平衡情感与理性。浪漫是美好的，但不应忽视现实。" }
+            },
+            { id: 48, name: "圣杯皇后", image: "圣杯皇后.jpg",
+              upright: { keywords: "情感丰富、直觉、母性", meaning: "圣杯皇后代表着丰富的情感和强大的直觉。", advice: "相信你的直觉，它是你最强大的指南针。" },
+              reversed: { keywords: "情感过度、依赖", meaning: "逆位可能意味着你过于情绪化或依赖他人。", advice: "学会管理你的情感，培养独立性。" }
+            },
+            { id: 49, name: "圣杯国王", image: "圣杯国王.jpg",
+              upright: { keywords: "情感成熟、智慧、平静", meaning: "圣杯国王代表着情感的成熟和智慧。他以平静的方式处理情感。", advice: "培养情感的成熟和智慧。平静的心态能够帮助你做出更好的决定。" },
+              reversed: { keywords: "情感操纵、不稳定", meaning: "逆位可能意味着你在情感上不稳定或操纵他人。", advice: "审视你的情感模式，学会真诚地表达情感。" }
+            },
+
+            // 宝剑小阿卡纳
+            { id: 50, name: "宝剑首牌", image: "宝剑王牌.jpg",
+              upright: { keywords: "新想法、清晰、突破", meaning: "宝剑首牌代表着新的想法和清晰的理解。突破即将到来。", advice: "抓住新的想法，用清晰的思维执行它。" },
+              reversed: { keywords: "混乱、思维不清", meaning: "逆位可能意味着你的思维混乱或缺乏清晰度。", advice: "整理你的思绪，找到真正的焦点。" }
+            },
+            { id: 51, name: "宝剑二", image: "双剑牌.jpg",
+              upright: { keywords: "优柔寡断、选择困难、僵持", meaning: "宝剑二代表着决策困难。你可能陷入了僵局。", advice: "相信你的直觉，做出决定。不做决定也是一种决定。" },
+              reversed: { keywords: "做出决定、释放压力", meaning: "逆位是一个积极的信号，意味着你正在做出决定。", advice: "继续前进，不要回头。每个决定都有其价值。" }
+            },
+            { id: 52, name: "宝剑三", image: "剑三.jpg",
+              upright: { keywords: "心碎、悲伤、分离", meaning: "宝剑三代表着心碎和分离。这是一段痛苦的时期。", advice: "允许自己悲伤，但不要让它定义你的生活。时间会疗愈一切。" },
+              reversed: { keywords: "疗愈、恢复、放下", meaning: "逆位是一个积极的信号，意味着你正在疗愈和恢复。", advice: "继续疗愈过程，你正在走出阴影。" }
+            },
+            { id: 53, name: "宝剑四", image: "宝剑四.jpg",
+              upright: { keywords: "休息、恢复、沉思", meaning: "宝剑四代表着休息和恢复。你需要暂时从战斗中退下。", advice: "给自己时间休息和反思。恢复是继续前进的基础。" },
+              reversed: { keywords: "不安、无法休息", meaning: "逆位可能意味着你无法安静下来休息。", advice: "学会冥想和放松。你的身心需要恢复。" }
+            },
+            { id: 54, name: "宝剑五", image: "剑五塔罗.jpg",
+              upright: { keywords: "冲突、背叛、失败", meaning: "宝剑五代表着冲突和背叛。你可能遭遇了失败。", advice: "从失败中学习，不要让它阻止你。失败是成功之母。" },
+              reversed: { keywords: "走出冲突、恢复", meaning: "逆位是一个积极的信号，意味着你正在走出冲突。", advice: "继续前进，把冲突留在身后。" }
+            },
+            { id: 55, name: "宝剑六", image: "六剑渡.jpg",
+              upright: { keywords: "过渡、离开、旅行", meaning: "宝剑六代表着过渡和离开。你正在走向新的方向。", advice: "勇敢地迎接过渡，新的机会在等待着你。" },
+              reversed: { keywords: "抗拒改变、延迟", meaning: "逆位可能意味着你抗拒必要的改变。", advice: "接受改变是生活的一部分。抗拒只会带来更多的痛苦。" }
+            },
+            { id: 57, name: "宝剑七", image: "剑七夜窃.jpg",
+              upright: { keywords: "欺骗、偷窃、不诚实", meaning: "宝剑七代表着欺骗和偷窃。你可能被不诚实的行为所伤害。", advice: "保持警惕，保护自己。诚实是最佳策略。" },
+              reversed: { keywords: "忏悔、承认错误", meaning: "逆位是一个积极的信号，意味着有人正在承认错误。", advice: "学会原谅，但也要保护自己。" }
+            },
+            { id: 58, name: "宝剑八", image: "剑八.jpg",
+              upright: { keywords: "束缚、限制、无助", meaning: "宝剑八代表着束缚和无助感。你可能感到被困住了。", advice: "寻找突破的方法。即使感到束缚，也要相信自由是可能的。" },
+              reversed: { keywords: "释放、自由", meaning: "逆位是一个积极的信号，意味着你正在获得自由。", advice: "继续走向自由，你正在挣脱束缚。" }
+            },
+            { id: 59, name: "宝剑九", image: "宝剑九.jpg",
+              upright: { keywords: "焦虑、担忧、失眠", meaning: "宝剑九代表着焦虑和担忧。你可能被负面思维所困扰。", advice: "关注你的思维模式。焦虑来自于对未来的恐惧。" },
+              reversed: { keywords: "恢复平静、释放焦虑", meaning: "逆位是一个积极的信号，意味着你正在释放焦虑。", advice: "继续寻找内心的平静。你正走在正确的道路上。" }
+            },
+            { id: 60, name: "宝剑十", image: "剑十逆位.jpg",
+              upright: { keywords: "痛苦、结束、谷底", meaning: "宝剑十代表着痛苦和结束。你已到达谷底，但这也是新的开始。", advice: "接受痛苦，相信这是结束也是开始。谷底是反弹的起点。" },
+              reversed: { keywords: "恢复、曙光出现", meaning: "逆位是一个积极的信号，意味着你正在从痛苦中恢复。", advice: "继续疗愈，曙光已经出现。" }
+            },
+            { id: 61, name: "宝剑侍从", image: "宝剑侍从.jpg",
+              upright: { keywords: "好奇心、新想法、沟通", meaning: "宝剑侍从代表着好奇心和新的想法。他喜欢探索和沟通。", advice: "保持好奇心，探索新的想法。沟通能够带来新的机会。" },
+              reversed: { keywords: "缺乏好奇心、沟通不畅", meaning: "逆位可能意味着你失去了好奇心或沟通不畅。", advice: "重新点燃你的求知欲。学习是一生的旅程。" }
+            },
+            { id: 62, name: "宝剑骑士", image: "剑骑士.jpg",
+              upright: { keywords: "行动迅速、有野心、聪明", meaning: "宝剑骑士代表着快速的思考和行动。他聪明而有野心。", advice: "运用你的智慧和速度，但不要忽视细节。" },
+              reversed: { keywords: "鲁莽、言辞犀利", meaning: "逆位可能意味着你过于急躁或言辞伤人。", advice: "学会三思而后行。智慧需要与慈悲相结合。" }
+            },
+            { id: 63, name: "宝剑皇后", image: "剑后银月.jpg",
+              upright: { keywords: "独立、边界、清晰思维", meaning: "宝剑皇后代表着独立的思维和清晰的边界。她知道如何保护自己。", advice: "建立健康的边界，保持思维的清晰。独立是强大的基础。" },
+              reversed: { keywords: "孤立、冷酷、缺乏同情", meaning: "逆位可能意味着你过于孤立或缺乏同情心。", advice: "平衡独立与连接。冷漠不是保护自己的最好方式。" }
+            },
+            { id: 64, name: "宝剑国王", image: "宝剑国王.jpg",
+              upright: { keywords: "智力权威、清晰、公正", meaning: "宝剑国王代表着智力权威和公正。他用理性和智慧领导。", advice: "运用你的智慧和公正做出决定。理性能够帮助你避免偏见。" },
+              reversed: { keywords: "滥用权力、操控、残酷", meaning: "逆位可能意味着你滥用权力或过于冷酷。", advice: "学会慈悲。没有情感的智慧是危险的。" }
+            },
+
+            // 星币小阿卡纳
+            { id: 65, name: "星币首牌", image: "星币首牌.jpg",
+              upright: { keywords: "新的财务机会、繁荣、物质开始", meaning: "星币首牌代表着新的财务机会和物质繁荣的开始。", advice: "抓住新的财务机会，但也要脚踏实地。成功需要规划和努力。" },
+              reversed: { keywords: "错失机会、贪婪", meaning: "逆位可能意味着你错失机会或过于贪婪。", advice: "重新评估你的财务目标。贪婪会破坏长期的成功。" }
+            },
+            { id: 66, name: "星币二", image: "双币侍者.jpg",
+              upright: { keywords: "平衡、资源管理、多任务处理", meaning: "星币二代表着平衡和资源管理。你需要同时处理多项任务。", advice: "找到工作与生活的平衡。有效的管理是成功的关键。" },
+              reversed: { keywords: "失衡、不堪重负", meaning: "逆位可能意味着你失去了平衡，感到不堪重负。", advice: "重新分配你的资源和时间。不要让任何事情失衡到无法控制的地步。" }
+            },
+            { id: 67, name: "星币三", image: "星币三.jpg",
+              upright: { keywords: "团队合作、初步成功、成长", meaning: "星币三代表着团队合作和初步的成功。与他人合作带来成果。", advice: "继续与他人合作。团队合作能够实现更大的目标。" },
+              reversed: { keywords: "缺乏合作、效率低下", meaning: "逆位可能意味着团队合作不佳或效率低下。", advice: "改善沟通，重建团队合作。效率来自于协调。" }
+            },
+            { id: 68, name: "星币四", image: "星币四.jpg",
+              upright: { keywords: "占有、保守、稳定", meaning: "星币四代表着占有和保守。你可能紧握资源，害怕失去。", advice: "学会分享。过度的占有欲会限制你的成长。" },
+              reversed: { keywords: "失控、浪费、风险", meaning: "逆位可能意味着你正在失去控制或承担了不必要的风险。", advice: "重新评估你的风险。稳定是成功的基础。" }
+            },
+            { id: 69, name: "星币五", image: "五芒星五号牌.jpg",
+              upright: { keywords: "贫困、缺乏、孤立", meaning: "星币五代表着贫困和缺乏。你可能感到物质上的不足。", advice: "不要让物质缺乏定义你的价值。真正的财富来自于内心。" },
+              reversed: { keywords: "恢复、找到支持", meaning: "逆位是一个积极的信号，意味着你正在找到支持和恢复。", advice: "继续寻求支持，不要独自面对困难。" }
+            },
+            { id: 70, name: "星币六", image: "六便士牌.jpg",
+              upright: { keywords: "慷慨、慈善、分享", meaning: "星币六代表着慷慨和慈善。与他人分享你的财富。", advice: "慷慨地给予，不期待回报。真正的财富来自于分享。" },
+              reversed: { keywords: "自私、嫉妒、不公平", meaning: "逆位可能意味着你过于自私或感到嫉妒。", advice: "学会分享。嫉妒只会消耗你的能量。" }
+            },
+            { id: 71, name: "星币七", image: "星币七.jpg",
+              upright: { keywords: "耐心、投资、长期规划", meaning: "星币七代表着耐心和长期投资。成功需要时间。", advice: "保持耐心，继续投资你的目标。最好的果实需要时间成熟。" },
+              reversed: { keywords: "缺乏耐心、投资失误", meaning: "逆位可能意味着你缺乏耐心或投资决策失误。", advice: "重新评估你的投资策略。耐心是美德，但也要明智。" }
+            },
+            { id: 72, name: "星币八", image: "八星币雕刻.jpg",
+              upright: { keywords: "勤奋、技能、工匠精神", meaning: "星币八代表着勤奋和工匠精神。你的努力正在创造价值。", advice: "继续努力工作，但也要关注你的健康。过度劳累会适得其反。" },
+              reversed: { keywords: "懒惰、缺乏技能、工作过度", meaning: "逆位可能意味着你懒惰或工作过度。", advice: "找到工作的平衡点。质量比数量更重要。" }
+            },
+            { id: 73, name: "星币九", image: "星币九.jpg",
+              upright: { keywords: "奢华、享受、成果", meaning: "星币九代表着奢华和享受。你正在享受努力的成果。", advice: "享受你的成功，但不要变得自满。持续的努力才能保持成果。" },
+              reversed: { keywords: "过度消费、不满足", meaning: "逆位可能意味着你过度消费或仍然不满足。", advice: "学会知足。物质享受不能填补内心的空虚。" }
+            },
+            { id: 74, name: "星币十", image: "星币十.jpg",
+              upright: { keywords: "财富、传承、家族繁荣", meaning: "星币十代表着财富和家族的繁荣。你已经达到了物质的成功。", advice: "感恩你的财富，思考如何传承给下一代。财富是责任。" },
+              reversed: { keywords: "家庭财务问题、失去财富", meaning: "逆位可能意味着家庭财务出现问题或失去财富。", advice: "重新评估你的财务计划。财富需要谨慎管理。" }
+            },
+            { id: 75, name: "星币侍从", image: "星币侍从.jpg",
+              upright: { keywords: "学习新技能、实际应用、勤奋", meaning: "星币侍者代表着学习新技能和实际应用。他勤奋好学。", advice: "继续学习和成长。实用技能是你最有价值的资产。" },
+              reversed: { keywords: "缺乏学习、懒惰、贪婪", meaning: "逆位可能意味着你缺乏学习动力或过于贪婪。", advice: "重新点燃你的学习热情。知识是真正的财富。" }
+            },
+            { id: 76, name: "星币骑士", image: "土骑士.jpg",
+              upright: { keywords: "稳步前进、可靠性、实际", meaning: "星币骑士代表着稳步前进和可靠性。他实际而稳重。", advice: "保持你的稳重，继续前进。可靠性是你最大的优势。" },
+              reversed: { keywords: "停滞、固执、缺乏远见", meaning: "逆位可能意味着你停滞不前或过于固执。", advice: "重新评估你的方法。有时需要改变策略才能前进。" }
+            },
+            { id: 77, name: "星币皇后", image: "星币皇后.jpg",
+              upright: { keywords: "繁荣、养育、自然", meaning: "星币皇后代表着繁荣和养育。她创造丰饶的环境。", advice: "继续培养你的事业和生活。繁荣来自于持续的努力和关爱。" },
+              reversed: { keywords: "财务不稳定、过度关注物质", meaning: "逆位可能意味着你的财务不稳定或过于关注物质。", advice: "平衡物质与精神。真正的繁荣来自于两者。" }
+            },
+            { id: 78, name: "星币国王", image: "星币国王.jpg",
+              upright: { keywords: "财富、事业成功、稳定", meaning: "星币国王代表着财富和事业成功。他创造了稳定和繁荣。", advice: "运用你的经验和智慧，继续创造价值。成功来自于积累。" },
+              reversed: { keywords: "贪婪、腐败、事业失败", meaning: "逆位可能意味着你过于贪婪或面临事业失败。", advice: "重新审视你的价值观。贪婪会破坏长期的成功。" }
+            }
+        ];
+
+        // 创建图片URL映射
+        const imageUrlMap = {
+            "愚者日出.jpg": "https://s.coze.cn/image/0uqV6jiiFTg/",
+            "魔术师牌.jpg": "https://s.coze.cn/image/jvYukbuqcGg/",
+            "女祭司塔罗.jpg": "https://s.coze.cn/image/JCGm2vIlKLk/",
+            "女皇塔罗.jpg": "https://s.coze.cn/image/DijvVcwk7YQ/",
+            "皇帝塔罗牌.jpg": "https://s.coze.cn/image/cE0HLw8bClA/",
+            "教皇塔罗牌.jpg": "https://s.coze.cn/image/3UGZGaS6bH8/",
+            "恋人塔罗.jpg": "https://s.coze.cn/image/wAQYghj1pSg/",
+            "战车塔罗.jpg": "https://s.coze.cn/image/Vs3QDiSgwFk/",
+            "力量牌.jpg": "https://s.coze.cn/image/ouCNG9m6Al8/",
+            "隐士星灯.jpg": "https://s.coze.cn/image/4pGCcdToIQA/",
+            "命运之轮.jpg": "https://s.coze.cn/image/Fy1Dfk7Uq_0/",
+            "正义塔罗.jpg": "https://s.coze.cn/image/6aDPA9f20oM/",
+            "倒吊人塔罗.jpg": "https://s.coze.cn/image/1IC1okfY57o/",
+            "死神塔罗牌.jpg": "https://s.coze.cn/image/Z33i5lDJFXc/",
+            "节制牌.jpg": "https://s.coze.cn/image/tvMO-HZIi24/",
+            "恶魔牌.jpg": "https://s.coze.cn/image/5zDbIteB9R8/",
+            "塔牌雷击坠.jpg": "https://s.coze.cn/image/v2k0mW-PWlg/",
+            "星牌设计.jpg": "https://s.coze.cn/image/Rl5oe2zrsq4/",
+            "月牌.jpg": "https://s.coze.cn/image/K1ru7zBtgrg/",
+            "太阳牌.jpg": "https://s.coze.cn/image/fGsduDRxCN8/",
+            "审判牌.jpg": "https://s.coze.cn/image/wkt2NRd7_sY/",
+            "塔罗世界牌.jpg": "https://s.coze.cn/image/cqNzQVjflzU/",
+            "火杖首牌.jpg": "https://s.coze.cn/image/0FOS2KWaOeQ/",
+            "火杖二.jpg": "https://s.coze.cn/image/0xv4kLW_B-I/",
+            "三权杖.jpg": "https://s.coze.cn/image/exhstpZC-F0/",
+            "火杖四.jpg": "https://s.coze.cn/image/Ca6FB5xovuQ/",
+            "火杖五争.jpg": "https://s.coze.cn/image/sahiYSbE2Ug/",
+            "火杖六.jpg": "https://s.coze.cn/image/25MoagKGYWk/",
+            "火杖七.jpg": "https://s.coze.cn/image/kSVvhJ-kvG0/",
+            "火杖八.jpg": "https://s.coze.cn/image/FV6KOCtM-UA/",
+            "九权杖.jpg": "https://s.coze.cn/image/BswB76TsuH8/",
+            "火杖十.jpg": "https://s.coze.cn/image/f9tEcBe0CWk/",
+            "火杖侍童.jpg": "https://s.coze.cn/image/Snk-ycfATT0/",
+            "火杖骑士.jpg": "https://s.coze.cn/image/dHbKM5Zgg40/",
+            "火后权杖.jpg": "https://s.coze.cn/image/RnAQSDOLjWM/",
+            "权杖国王.jpg": "https://s.coze.cn/image/tsXM_SX2xgA/",
+            "圣杯首牌.jpg": "https://s.coze.cn/image/5GYNXTR9E1w/",
+            "圣杯二.jpg": "https://s.coze.cn/image/W4O7XPJUxEY/",
+            "三圣杯.jpg": "https://s.coze.cn/image/qqn1bsEK8Ps/",
+            "四杯牌.jpg": "https://s.coze.cn/image/VcTAqTwWyVo/",
+            "圣杯五.jpg": "https://s.coze.cn/image/lW48YTl5SAA/",
+            "圣杯六.jpg": "https://s.coze.cn/image/X6TwKtPVv3Y/",
+            "圣杯七.jpg": "https://s.coze.cn/image/U4aSNzeSVMM/",
+            "离杯向山.jpg": "https://s.coze.cn/image/ndaeHAJHKBE/",
+            "圣杯九.jpg": "https://s.coze.cn/image/DH5DGP5YRwQ/",
+            "圣杯十家庭.jpg": "https://s.coze.cn/image/Kep9bylRGCs/",
+            "杯侍者.jpg": "https://s.coze.cn/image/Q3QpD03gZq4/",
+            "圣杯骑士.jpg": "https://s.coze.cn/image/FFDSgx3_8Vw/",
+            "圣杯皇后.jpg": "https://s.coze.cn/image/Oy9YAfr2eYU/",
+            "圣杯国王.jpg": "https://s.coze.cn/image/R_ld2yCYHV4/",
+            "宝剑王牌.jpg": "https://s.coze.cn/image/CZcvKim6RgY/",
+            "双剑牌.jpg": "https://s.coze.cn/image/nf20ZHRLurg/",
+            "剑三.jpg": "https://s.coze.cn/image/1f6frW1pQiA/",
+            "宝剑四.jpg": "https://s.coze.cn/image/Ywzc4d6fNOA/",
+            "剑五塔罗.jpg": "https://s.coze.cn/image/Gg664U58zNc/",
+            "六剑渡.jpg": "https://s.coze.cn/image/ug5AFqp5UkE/",
+            "剑七夜窃.jpg": "https://s.coze.cn/image/YNArhYXqdg8/",
+            "剑八.jpg": "https://s.coze.cn/image/f08caue0HPA/",
+            "宝剑九.jpg": "https://s.coze.cn/image/fcJ0csH0OPo/",
+            "剑十逆位.jpg": "https://s.coze.cn/image/HsU2Y5rE9A4/",
+            "宝剑侍从.jpg": "https://s.coze.cn/image/p9C9GpaI8lw/",
+            "剑骑士.jpg": "https://s.coze.cn/image/TlPPfKaZ3Iw/",
+            "剑后银月.jpg": "https://s.coze.cn/image/tGleMmJHT7c/",
+            "宝剑国王.jpg": "https://s.coze.cn/image/qVORLM1hBNc/",
+            "星币首牌.jpg": "https://s.coze.cn/image/x-TrOSuGGNU/",
+            "双币侍者.jpg": "https://s.coze.cn/image/8dXGYyx19XY/",
+            "星币三.jpg": "https://s.coze.cn/image/WczorIxrK9Q/",
+            "星币四.jpg": "https://s.coze.cn/image/LGmfyaxHH4s/",
+            "五芒星五号牌.jpg": "https://s.coze.cn/image/Fd70gKLhuiI/",
+            "六便士牌.jpg": "https://s.coze.cn/image/gFkw5jcz_wY/",
+            "星币七.jpg": "https://s.coze.cn/image/SpwqjdlQAWU/",
+            "八星币雕刻.jpg": "https://s.coze.cn/image/6iQ7tDRK82M/",
+            "星币九.jpg": "https://s.coze.cn/image/_7cpmBgImcU/",
+            "星币十.jpg": "https://s.coze.cn/image/lCwwxk_aBoY/",
+            "星币侍从.jpg": "https://s.coze.cn/image/W30baUwAWOI/",
+            "土骑士.jpg": "https://s.coze.cn/image/N12oHz1b-pE/",
+            "星币皇后.jpg": "https://s.coze.cn/image/xnbP6DRGFXg/",
+            "星币国王.jpg": "https://s.coze.cn/image/qEM1g59ifnA/"
+        };
+
+        let shuffledDeck = [];
+        let drawnCards = [];
+        let isShuffled = false;
+
+        // 洗牌算法
+        function shuffleDeck() {
+            const spreadArea = document.getElementById('spreadArea');
+            const cards = document.querySelectorAll('.card');
+
+            // 添加洗牌动画
+            cards.forEach(card => {
+                card.classList.add('shuffle-animation');
+                setTimeout(() => card.classList.remove('shuffle-animation'), 500);
+            });
+
+            setTimeout(() => {
+                // Fisher-Yates 洗牌算法
+                shuffledDeck = [...tarotDeck];
+                for (let i = shuffledDeck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
+                }
+
+                drawnCards = [];
+                isShuffled = true;
+
+                document.getElementById('shuffleBtn').disabled = true;
+                document.getElementById('drawBtn').disabled = false;
+                document.getElementById('instructions').textContent = '牌组已洗好，点击"抽牌"开始占卜';
+                createCardSlots();
+            }, 500);
+        }
+
+        // 创建卡牌槽位
+        function createCardSlots() {
+            const spreadArea = document.getElementById('spreadArea');
+            const spreadType = document.getElementById('spreadType').value;
+
+            spreadArea.innerHTML = '';
+            drawnCards = [];
+
+            const positions = spreadType === 'one'
+                ? [{ label: '指引', meaning: '今日占卜结果' }]
+                : [
+                    { label: '过去', meaning: '影响你过去的因素' },
+                    { label: '现在', meaning: '当前的状况' },
+                    { label: '未来', meaning: '可能的走向' }
+                ];
+
+            positions.forEach((pos, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'card-slot';
+                slot.innerHTML = `
+                    <div class="card" id="card-${index}">
+                        <div class="card-inner">
+                            <div class="card-front">
+                                <img src="" alt="" class="card-image">
+                                <div class="card-name"></div>
+                            </div>
+                            <div class="card-back">
+                                <div class="card-back-pattern">
+                                    <span class="card-back-symbol">✦</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-label">${pos.label}</div>
+                `;
+                spreadArea.appendChild(slot);
+                drawnCards.push(null);
+            });
+        }
+
+        // 抽牌
+        function drawCards() {
+            const spreadType = document.getElementById('spreadType').value;
+            const cardCount = spreadType === 'one' ? 1 : 3;
+
+            for (let i = 0; i < cardCount; i++) {
+                if (shuffledDeck.length > 0) {
+                    // 随机选择正逆位（65%正位，35%逆位）
+                    const isReversed = Math.random() > 0.65;
+                    const card = shuffledDeck.pop();
+                    // 使用 isReversedPosition 标记牌面是否逆位，避免与 reversed 属性冲突
+                    card.isReversedPosition = isReversed;
+                    drawnCards[i] = card;
+
+                    // 更新卡片
+                    const cardElement = document.getElementById(`card-${i}`);
+                    const imageUrl = imageUrlMap[card.image] || 'https://s.coze.cn/image/0uqV6jiiFTg/';
+
+                    cardElement.querySelector('.card-image').src = imageUrl;
+                    cardElement.querySelector('.card-image').alt = card.name;
+                    cardElement.querySelector('.card-name').textContent = card.name + (isReversed ? '（逆位）' : '');
+
+                    // 翻转卡片
+                    setTimeout(() => {
+                        cardElement.classList.add('flipped');
+                        if (isReversed) {
+                            cardElement.classList.add('reversed');
+                        }
+                    }, i * 300);
+                }
+            }
+
+            document.getElementById('drawBtn').disabled = true;
+            document.getElementById('instructions').textContent = '点击卡片查看详细解读';
+
+            // 添加点击事件显示解读
+            setTimeout(() => {
+                drawnCards.forEach((card, index) => {
+                    if (card) {
+                        const cardElement = document.getElementById(`card-${index}`);
+                        cardElement.onclick = () => showMeaning(index);
+                    }
+                });
+            }, cardCount * 300 + 300);
+        }
+
+        // 显示解读
+        function showMeaning(index) {
+            const card = drawnCards[index];
+            if (!card) {
+                console.log('Card not found at index:', index);
+                return;
+            }
+
+            const spreadType = document.getElementById('spreadType').value;
+            const positions = spreadType === 'one'
+                ? [{ label: '指引', meaning: '今日占卜结果' }]
+                : [
+                    { label: '过去', meaning: '影响你过去的因素' },
+                    { label: '现在', meaning: '当前的状况' },
+                    { label: '未来', meaning: '可能的走向' }
+                ];
+
+            const positionInfo = positions[index];
+            // 使用 isReversedPosition 判断是否逆位，避免与 reversed 属性冲突
+            const cardData = card.isReversedPosition ? card.reversed : card.upright;
+
+            console.log('Card:', card);
+            console.log('Card.isReversedPosition:', card.isReversedPosition);
+            console.log('Card data to display:', cardData);
+
+            // 检查数据是否存在
+            if (!cardData || !cardData.keywords) {
+                console.error('Card data is missing:', cardData);
+                alert('该牌的解读数据缺失，请检查代码配置。');
+                return;
+            }
+
+            document.getElementById('modalTitle').innerHTML =
+                card.name + (card.isReversedPosition ? '<span class="reversed-badge">逆位</span>' : '');
+            document.getElementById('modalPosition').textContent = positionInfo.label + ' — ' + positionInfo.meaning;
+            document.getElementById('modalKeywords').textContent = cardData.keywords;
+            document.getElementById('modalMeaning').textContent = cardData.meaning;
+            document.getElementById('modalAdvice').textContent = cardData.advice;
+
+            document.getElementById('meaningModal').classList.add('show');
+        }
+
+        // 关闭解读窗口
+        function closeModal() {
+            document.getElementById('meaningModal').classList.remove('show');
+        }
+
+        // 重置游戏
+        function resetGame() {
+            shuffledDeck = [];
+            drawnCards = [];
+            isShuffled = false;
+
+            document.getElementById('shuffleBtn').disabled = false;
+            document.getElementById('drawBtn').disabled = true;
+            document.getElementById('instructions').textContent = '点击"洗牌"开始，然后点击"抽牌"获取你的塔罗指引';
+            document.getElementById('spreadArea').innerHTML = '';
+        }
+
+        // 初始化
+        window.onload = function() {
+            createCardSlots();
+        };
+    </script>
+</body>
+</html>
